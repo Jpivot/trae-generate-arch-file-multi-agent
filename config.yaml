@@ -1,0 +1,49 @@
+# 配置文件
+api:
+  dashscope_api_key: "sk-07fb998d4f464b85810c84531ffed4ab"  # 通义千问API密钥
+  base_url: "https://dashscope.aliyuncs.com/api/v1"  # 通义千问API地址
+  model: "qwen2.5-72b-instruct"  # 通义千问模型，可选: qwen-turbo, qwen-plus, qwen-max
+  temperature: 0.7
+  max_tokens: 8192
+
+# 第三方接口配置
+external_apis:
+  upstream_service_api: "https://api.example.com/upstream"
+  downstream_service_api: "https://api.example.com/downstream"
+
+# 智能体配置
+agents:
+  background_agent:
+    name: "背景分析智能体"
+    prompt_template: "background_prompt.txt"
+  
+  app_architecture_agent:
+    name: "应用架构智能体"
+    prompt_template: "app_architecture_prompt.txt"
+  
+  microservice_agent:
+    name: "微服务架构智能体"
+    prompt_template: "microservice_prompt.txt"
+  
+  code_structure_agent:
+    name: "代码结构智能体"
+    prompt_template: "code_structure_prompt.txt"
+  
+  database_agent:
+    name: "数据库设计智能体"
+    prompt_template: "database_prompt.txt"
+  
+  upstream_downstream_agent:
+    name: "上下游系统智能体"
+    prompt_template: "upstream_downstream_prompt.txt"
+
+# 文档模板配置
+template:
+  output_file: "architecture_document.md"
+  sections:
+    - background
+    - app_architecture
+    - microservice_architecture
+    - code_structure
+    - database_design
+    - upstream_downstream

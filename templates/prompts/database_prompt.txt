@@ -1,0 +1,114 @@
+你是一个专业的架构师，负责生成数据库设计章节。
+
+请根据以下信息生成数据库设计章节：
+
+输入信息：
+- 系统描述：{system_description}
+- 数据库信息：{database_info}
+- 微服务架构信息：{microservice_context}
+- 业务实体：{business_entities}
+
+示例格式：
+### 数据库架构
+#### 整体设计原则
+- **微服务数据独立**：每个微服务拥有独立的数据库
+- **读写分离**：主库写入，从库读取，提升性能
+- **分库分表**：按业务或数据量进行水平拆分
+- **数据一致性**：关键数据强一致性，非关键数据最终一致性
+
+#### 数据库实例规划
+| 服务名称 | 数据库类型 | 实例名称 | 主要表 | 备注 |
+|---------|-----------|----------|--------|------|
+| 用户服务 | MySQL 8.0 | user_db | users, user_profiles | 主从复制 |
+| 订单服务 | MySQL 8.0 | order_db | orders, order_items | 分库分表 |
+| 支付服务 | MySQL 8.0 | payment_db | payments, transactions | 高可用 |
+| 日志服务 | MongoDB | log_db | access_logs, error_logs | 文档存储 |
+| 缓存层 | Redis 6.0 | cache_cluster | - | 集群模式 |
+
+### 核心表设计
+#### 用户表 (users)
+```sql
+CREATE TABLE users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID',
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
+    email VARCHAR(100) NOT NULL UNIQUE COMMENT '邮箱',
+    password_hash VARCHAR(255) NOT NULL COMMENT '密码哈希',
+    status TINYINT DEFAULT 1 COMMENT '状态：1-正常，0-禁用',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_username (username),
+    INDEX idx_email (email),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+```
+
+#### 订单表 (orders)
+```sql
+CREATE TABLE orders (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '订单ID',
+    order_no VARCHAR(32) NOT NULL UNIQUE COMMENT '订单号',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    total_amount DECIMAL(10,2) NOT NULL COMMENT '订单总金额',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '订单状态：1-待支付，2-已支付，3-已取消',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_order_no (order_no),
+    INDEX idx_user_id (user_id),
+    INDEX idx_status (status),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单表';
+```
+
+### 分库分表策略
+#### 订单表分表
+- **分表规则**：按订单创建时间按月分表
+- **表名规则**：orders_YYYYMM (如：orders_202401)
+- **路由策略**：根据created_at字段路由到对应月份表
+
+#### 用户表分库
+- **分库规则**：按user_id取模分库
+- **分库数量**：4个库 (user_db_0, user_db_1, user_db_2, user_db_3)
+- **路由策略**：user_id % 4
+
+### 缓存设计
+#### Redis缓存策略
+```
+# 用户信息缓存
+KEY: user:info:{user_id}
+VALUE: JSON格式用户信息
+TTL: 1小时
+
+# 订单缓存
+KEY: order:info:{order_id}
+VALUE: JSON格式订单信息
+TTL: 30分钟
+
+# 热点数据缓存
+KEY: hot:products
+VALUE: 热门商品列表
+TTL: 10分钟
+```
+
+### 数据同步
+#### 主从同步
+- **同步方式**：MySQL主从复制
+- **延迟监控**：监控主从延迟，超过1秒告警
+- **故障切换**：主库故障时自动切换到从库
+
+#### 跨服务数据同步
+- **事件驱动**：通过消息队列同步数据变更
+- **最终一致性**：非关键数据允许短暂不一致
+- **补偿机制**：定时任务检查和修复数据不一致
+
+### 性能优化
+- **索引优化**：合理创建索引，避免过度索引
+- **SQL优化**：避免全表扫描，使用EXPLAIN分析
+- **连接池**：合理配置数据库连接池
+- **慢查询监控**：监控慢查询并优化
+
+### 备份恢复
+- **备份策略**：每日全量备份 + 实时增量备份
+- **备份保留**：全量备份保留30天，增量备份保留7天
+- **恢复测试**：定期进行备份恢复测试
+
+请严格按照上述格式生成内容，确保数据库设计合理、性能优化到位。

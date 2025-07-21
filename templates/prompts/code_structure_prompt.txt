@@ -1,0 +1,99 @@
+你是一个专业的架构师，负责生成代码结构章节。
+
+请根据以下信息生成代码结构章节：
+
+输入信息：
+- 系统描述：{system_description}
+- 技术栈：{tech_stack}
+- 微服务架构信息：{microservice_context}
+- 开发规范：{dev_standards}
+
+示例格式：
+### 项目结构
+```
+project-root/
+├── services/                 # 微服务目录
+│   ├── user-service/         # 用户服务
+│   │   ├── src/
+│   │   │   ├── main/
+│   │   │   │   ├── java/
+│   │   │   │   │   └── com/company/user/
+│   │   │   │   │       ├── controller/    # 控制层
+│   │   │   │   │       ├── service/       # 业务层
+│   │   │   │   │       ├── repository/    # 数据访问层
+│   │   │   │   │       ├── entity/        # 实体类
+│   │   │   │   │       ├── dto/           # 数据传输对象
+│   │   │   │   │       └── config/        # 配置类
+│   │   │   │   └── resources/
+│   │   │   │       ├── application.yml
+│   │   │   │       └── mapper/            # MyBatis映射文件
+│   │   │   └── test/                      # 测试代码
+│   │   ├── Dockerfile
+│   │   └── pom.xml
+│   ├── order-service/        # 订单服务
+│   └── payment-service/      # 支付服务
+├── common/                   # 公共模块
+│   ├── common-core/          # 核心工具类
+│   ├── common-security/      # 安全组件
+│   └── common-database/      # 数据库组件
+├── gateway/                  # API网关
+├── config/                   # 配置中心
+├── docker-compose.yml        # 容器编排
+└── README.md
+```
+
+### 分层架构
+#### Controller层
+- 职责：接收HTTP请求，参数校验，调用Service层
+- 规范：使用RESTful API设计，统一返回格式
+- 示例：
+```java
+@RestController
+@RequestMapping("/api/v1/users")
+public class UserController {
+    @Autowired
+    private UserService userService;
+    
+    @GetMapping("/{id}")
+    public Result<UserDTO> getUser(@PathVariable Long id) {
+        return Result.success(userService.getUser(id));
+    }
+}
+```
+
+#### Service层
+- 职责：业务逻辑处理，事务管理
+- 规范：接口与实现分离，事务注解使用
+- 示例：
+```java
+@Service
+@Transactional
+public class UserServiceImpl implements UserService {
+    @Autowired
+    private UserRepository userRepository;
+    
+    public UserDTO getUser(Long id) {
+        User user = userRepository.findById(id);
+        return UserConverter.toDTO(user);
+    }
+}
+```
+
+#### Repository层
+- 职责：数据访问，SQL执行
+- 规范：使用JPA或MyBatis，SQL优化
+
+### 编码规范
+- **命名规范**：驼峰命名法，见名知意
+- **注释规范**：类和方法必须有注释
+- **异常处理**：统一异常处理机制
+- **日志规范**：使用SLF4J，分级记录
+- **代码检查**：使用SonarQube进行代码质量检查
+
+### 构建部署
+- **构建工具**：Maven/Gradle
+- **容器化**：Docker + Kubernetes
+- **CI/CD**：Jenkins/GitLab CI
+- **环境管理**：开发、测试、生产环境隔离
+
+请严格按照上述格式生成内容，确保代码结构清晰、规范合理。

@@ -1,0 +1,48 @@
+{
+  "project_name": "智能客服系统",
+  "system_id": "smart_customer_service",
+  "system_description": "基于AI的智能客服系统，支持多渠道接入、自然语言处理、知识库管理等功能",
+  "tech_stack": {
+    "前端": [
+      "Vue.js 3",
+      "TypeScript",
+      "Element Plus"
+    ],
+    "后端": [
+      "Spring Boot",
+      "Spring Cloud Gateway",
+      "Java 17"
+    ],
+    "AI/ML": [
+      "Python",
+      "TensorFlow",
+      "BERT",
+      "FastAPI"
+    ],
+    "数据库": [
+      "PostgreSQL",
+      "Redis",
+      "Elasticsearch"
+    ],
+    "消息队列": [
+      "Apache Kafka"
+    ],
+    "容器化": [
+      "Docker",
+      "Kubernetes"
+    ]
+  },
+  "database_info": {
+    "primary_db": "PostgreSQL 14",
+    "cache_db": "Redis 7.0",
+    "search_engine": "Elasticsearch 8.0",
+    "vector_db": "Milvus"
+  },
+  "business_requirements": [
+    "支持多渠道接入（网页、微信、APP）",
+    "智能意图识别准确率>90%",
+    "平均响应时间<2秒",
+    "支持7x24小时服务",
+    "支持多语言"
+  ]
+}

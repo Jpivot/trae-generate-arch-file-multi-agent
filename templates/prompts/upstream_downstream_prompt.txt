@@ -1,0 +1,186 @@
+你是一个专业的架构师，负责生成上下游系统章节。
+
+请根据以下信息生成上下游系统章节：
+
+输入信息：
+- 系统描述：{system_description}
+- 技术栈：{tech_stack}
+- 外部系统信息：{external_systems}
+- API接口信息：{api_info}
+
+示例格式：
+### 系统集成架构
+```
+[上游系统] -> [当前系统] -> [下游系统]
+     |            |            |
+  [第三方API]  [消息队列]  [外部服务]
+```
+
+### 上游系统
+#### 用户认证系统
+- **系统名称**：统一认证中心 (SSO)
+- **接口协议**：OAuth 2.0 / SAML
+- **调用方式**：HTTPS REST API
+- **主要功能**：
+  - 用户登录认证
+  - 权限验证
+  - Token刷新
+- **接口示例**：
+```
+POST /auth/login
+Content-Type: application/json
+{
+  "username": "user@example.com",
+  "password": "encrypted_password"
+}
+
+Response:
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "refresh_token": "dGVzdCByZWZyZXNoIHRva2Vu",
+  "expires_in": 3600
+}
+```
+
+#### 支付网关
+- **系统名称**：第三方支付平台
+- **接口协议**：HTTPS REST API
+- **调用方式**：同步调用 + 异步回调
+- **主要功能**：
+  - 支付订单创建
+  - 支付状态查询
+  - 退款处理
+- **容错机制**：
+  - 重试策略：3次重试，指数退避
+  - 熔断机制：连续失败5次后熔断30秒
+  - 降级策略：支付失败时记录订单，后续补偿
+
+### 下游系统
+#### 消息推送系统
+- **系统名称**：统一消息中心
+- **接口协议**：HTTPS REST API + WebSocket
+- **调用方式**：异步调用
+- **主要功能**：
+  - 短信通知
+  - 邮件推送
+  - App推送
+  - 站内消息
+- **消息格式**：
+```json
+{
+  "message_id": "msg_123456",
+  "user_id": "user_789",
+  "type": "sms",
+  "template_id": "order_success",
+  "params": {
+    "order_no": "ORD20240101001",
+    "amount": "99.00"
+  },
+  "priority": "high"
+}
+```
+
+#### 数据分析系统
+- **系统名称**：大数据分析平台
+- **接口协议**：Kafka消息队列
+- **调用方式**：事件驱动
+- **主要功能**：
+  - 用户行为分析
+  - 业务指标统计
+  - 实时监控告警
+- **数据格式**：
+```json
+{
+  "event_type": "user_action",
+  "timestamp": "2024-01-01T10:00:00Z",
+  "user_id": "user_123",
+  "action": "order_create",
+  "properties": {
+    "order_id": "order_456",
+    "amount": 99.00,
+    "category": "electronics"
+  }
+}
+```
+
+### 第三方服务
+#### 地图服务
+- **服务商**：高德地图API
+- **主要功能**：地址解析、距离计算、路径规划
+- **调用限制**：每日10万次调用
+- **备用方案**：百度地图API
+
+#### 短信服务
+- **服务商**：阿里云短信服务
+- **主要功能**：验证码发送、通知短信
+- **调用限制**：每分钟100条
+- **备用方案**：腾讯云短信服务
+
+### 接口管理
+#### API网关配置
+```yaml
+routes:
+  - id: auth_service
+    uri: http://auth-service:8080
+    predicates:
+      - Path=/api/auth/**
+    filters:
+      - name: RateLimiter
+        args:
+          rate: 100
+          burst: 200
+      - name: Retry
+        args:
+          retries: 3
+```
+
+#### 接口文档
+- **文档工具**：Swagger/OpenAPI 3.0
+- **文档地址**：https://api.example.com/docs
+- **版本管理**：语义化版本控制 (v1.0.0)
+
+### 监控告警
+#### 接口监控
+- **响应时间**：P95 < 500ms
+- **成功率**：> 99.9%
+- **QPS监控**：实时监控调用量
+- **错误告警**：错误率 > 1% 时告警
+
+#### 依赖健康检查
+```
+# 上游系统健康检查
+GET /health/upstream
+Response:
+{
+  "auth_service": "healthy",
+  "payment_gateway": "healthy",
+  "map_service": "degraded"
+}
+
+# 下游系统健康检查
+GET /health/downstream
+Response:
+{
+  "message_center": "healthy",
+  "analytics_platform": "healthy"
+}
+```
+
+### 数据流转
+#### 同步数据流
+```
+用户请求 -> API网关 -> 业务服务 -> 上游认证 -> 返回结果
+```
+
+#### 异步数据流
+```
+业务事件 -> 消息队列 -> 下游系统 -> 处理完成通知
+```
+
+### 安全机制
+- **API密钥**：所有外部调用使用API Key认证
+- **IP白名单**：限制调用来源IP
+- **数据加密**：敏感数据传输使用TLS 1.3
+- **签名验证**：关键接口使用数字签名
+
+请严格按照上述格式生成内容，确保系统集成设计完整、安全可靠。
